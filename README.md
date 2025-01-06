@@ -7,6 +7,7 @@ This repository holds all related Audit reports for Sonic and HyperGrid projects
 2. [HyperGrid Shared State Network (HSSN) Audit Report](./Hypergrid%20SSN-SSC.pdf).
 3. [Sonic SVM Token Contract Audit Report](./Quantstamp_MirrorWorld_TokenVesting_FinalReport.pdf).
 4. [veSonic Contract Audit Report](./veSonic%20Smart%20Contract%20Security%20Audit%20Report.pdf).
+4. [Sonic Staking Contract Audit Report](./Sonic%20Staking%20Smart%20Contract%20Security%20Audit%20Report.pdf).
 
 ## Technicals & Governance
 1. [Sonic SVM - Whitepaper](./Sonic%20SVM%20–%20A%20HyperGrid%20Scaling%20Future%20of%20Solana.pdf)
