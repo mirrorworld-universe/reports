@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SONIC Quarterly Performance Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --card: #0a0a0a;
+      --card-2: #111318;
+      --line: #232733;
+      --text: #fff;
+      --text-2: #d9d9df;
+      --muted: #7e8493;
+      --blue: #0000ff;
+      --blue-10: rgba(0,0,255,.12);
+      --green: #00ff94;
+      --green-10: rgba(0,255,148,.1);
+      --purple: #a855f7;
+      --purple-10: rgba(168,85,247,.12);
+      --red: #ff3b3b;
+      --radius: 10px;
+      --glow-blue: 0 0 18px rgba(0,0,255,.35);
+      --glow-green: 0 0 18px rgba(0,255,148,.35);
+      --font-display: 'Orbitron', sans-serif;
+      --font-body: 'Manrope', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); overflow: hidden; }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(0,0,255,.14), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(0,255,148,.10), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.02), transparent 18%);
+      pointer-events: none;
+    }
+    .deck { width: 100%; height: 100%; position: relative; }
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(24px);
+      transition: .35s ease;
+      padding: 56px 72px 76px;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .slide-inner { max-width: 1160px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .center { justify-content: center; align-items: center; text-align: center; }
+    .left { justify-content: center; align-items: stretch; }
+    .caption {
+      font: 600 12px var(--font-display);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .h0, .h1, .h2, .h3, .h4 { font-family: var(--font-display); line-height: 1.18; }
+    .h0 { font-size: 56px; max-width: 980px; }
+    .h1 { font-size: 42px; }
+    .h2 { font-size: 32px; }
+    .h3 { font-size: 24px; }
+    .h4 { font-size: 17px; }
+    .subtitle { font-size: 22px; line-height: 1.5; color: var(--text-2); max-width: 860px; }
+    .body { font-size: 18px; line-height: 1.65; color: var(--text-2); }
+    .body-sm { font-size: 15px; line-height: 1.6; color: var(--text-2); }
+    .text-blue { color: #7a8cff; }
+    .text-green { color: var(--green); }
+    .text-purple { color: #c084fc; }
+    .glow-line { width: 72px; height: 4px; border-radius: 999px; background: var(--blue); box-shadow: var(--glow-blue); }
+    .glow-line.green { background: var(--green); box-shadow: var(--glow-green); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px;
+      font: 600 11px var(--font-display); letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text-2); background: rgba(255,255,255,.02);
+    }
+    .badge.blue { background: var(--blue-10); color: #8e9cff; }
+    .badge.green { background: var(--green-10); color: var(--green); }
+    .hero-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .two-col { display: grid; grid-template-columns: 1.02fr 1.18fr; gap: 26px; align-items: stretch; }
+    .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+    }
+    .card.soft-blue { background: linear-gradient(180deg, rgba(0,0,255,.10), rgba(255,255,255,.02)); }
+    .card.soft-green { background: linear-gradient(180deg, rgba(0,255,148,.08), rgba(255,255,255,.02)); }
+    .card.soft-purple { background: linear-gradient(180deg, rgba(168,85,247,.10), rgba(255,255,255,.02)); }
+    .bullets { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .bullets li { padding-left: 22px; position: relative; font-size: 18px; line-height: 1.55; color: var(--text-2); }
+    .bullets li::before {
+      content: '';
+      width: 8px; height: 8px; position: absolute; left: 0; top: 10px;
+      background: var(--blue); border-radius: 2px; box-shadow: var(--glow-blue);
+    }
+    .bullets.green li::before { background: var(--green); box-shadow: var(--glow-green); }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .stat { padding: 22px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card); }
+    .stat-value { font: 800 34px var(--font-display); }
+    .stat-label { margin-top: 8px; font: 600 11px var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .dim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .dim-index { font: 600 11px var(--font-display); letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+    .mini { font-size: 16px; line-height: 1.55; color: var(--text-2); }
+    .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 8px; }
+    .feature { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; background: rgba(255,255,255,.02); }
+    .feature .h4 { margin-bottom: 8px; }
+    .split { display: grid; grid-template-columns: 1.05fr 1.25fr; gap: 24px; }
+    .callout {
+      border-left: 3px solid var(--green);
+      padding: 14px 0 14px 18px;
+      background: linear-gradient(90deg, rgba(0,255,148,.06), transparent 60%);
+    }
+    .table { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .table-row { display: grid; grid-template-columns: 1.05fr 1.95fr; }
+    .table-row > div { padding: 14px 16px; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 1.5; }
+    .table-row > div:first-child { background: rgba(255,255,255,.02); color: var(--text); font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .table-row.head > div { background: rgba(0,0,255,.10); color: #8e9cff; font-weight: 700; }
+    .table-row:last-child > div { border-bottom: 0; }
+    .pill-list { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; background: rgba(255,255,255,.02); color: var(--text-2); font-size: 14px; }
+    .timeline { display: grid; gap: 14px; }
+    .timeline-item { display: grid; grid-template-columns: 210px 1fr; gap: 18px; align-items: start; border-left: 2px solid var(--line); margin-left: 8px; padding-left: 24px; position: relative; }
+    .timeline-item::before { content: ''; position: absolute; left: -7px; top: 10px; width: 12px; height: 12px; border-radius: 50%; background: var(--blue); box-shadow: var(--glow-blue); }
+    .timeline-item.done::before { background: var(--green); box-shadow: var(--glow-green); }
+    .timeline-date { font: 600 12px var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+    .score-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .score-card { border: 1px solid var(--line); border-radius: 8px; padding: 16px 14px; background: rgba(255,255,255,.02); }
+    .score-card .range { font: 700 18px var(--font-display); }
+    .score-card .mul { color: var(--green); margin-top: 8px; font-weight: 700; }
+    .footer-note { position: fixed; bottom: 26px; left: 40px; font: 600 11px var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: #4f5668; }
+    .counter { position: fixed; bottom: 26px; right: 40px; font: 600 11px var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: #4f5668; }
+    .nav { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+    .nav .dot { width: 9px; height: 9px; border-radius: 999px; background: #262a34; cursor: pointer; transition: .25s ease; }
+    .nav .dot.active { width: 24px; background: var(--blue); box-shadow: var(--glow-blue); }
+    @media print {
+      html, body { overflow: visible; }
+      .slide { position: relative; opacity: 1; transform: none; pointer-events: auto; page-break-after: always; min-height: 100vh; }
+      .nav, .counter, .footer-note { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+    <section class="slide active">
+      <div class="slide-inner center">
+        <div class="glow-line"></div>
+        <div class="caption">Officially launched in Q2 2025</div>
+        <h1 class="h0">SONIC Quarterly Performance Framework</h1>
+        <p class="subtitle">Do the right thing, do it in a better way, and keep getting stronger.</p>
+        <div class="hero-row">
+          <div class="badge blue">Sonic Design System</div>
+          <div class="badge green">Performance Framework</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Context</div>
+        <h2 class="h1">What does “valuable work” mean today?</h2>
+        <div class="two-col">
+          <div class="card soft-blue">
+            <p class="body">A lot of things we used to spend time on, writing reports, executing tasks, syncing information, are already being replaced by AI, and this trend will only accelerate.</p>
+            <div style="height:18px"></div>
+            <div class="callout">
+              <p class="body">The question is no longer how well we execute, but what kind of value we can still uniquely provide.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="feature-grid">
+              <div class="feature">
+                <div class="h4 text-blue">Judgment</div>
+                <div class="mini">Being able to decide what is worth doing and what is not.</div>
+              </div>
+              <div class="feature">
+                <div class="h4 text-green">Creativity</div>
+                <div class="mini">Being able to propose new directions instead of just following instructions.</div>
+              </div>
+            </div>
+            <div style="height:18px"></div>
+            <ul class="bullets">
+              <li>If someone only focuses on execution without thinking, deciding, or creating, it becomes harder to stay competitive.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Purpose</div>
+        <h2 class="h1">The purpose of this framework</h2>
+        <div class="split">
+          <div class="card soft-purple">
+            <ul class="bullets green">
+              <li>We are not trying to “evaluate people” in a traditional sense.</li>
+              <li>It is not a scoring tool designed to categorize or judge people mechanically.</li>
+              <li>We are defining what “excellent” looks like in this team, in this era.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="dim-grid" style="grid-template-columns:1fr; gap:16px;">
+              <div class="feature">
+                <div class="dim-index">01</div>
+                <div class="h4">A behavioral guideline</div>
+                <div class="mini">It tells us what kind of behavior we value as a team.</div>
+              </div>
+              <div class="feature">
+                <div class="dim-index">02</div>
+                <div class="h4">A feedback mechanism</div>
+                <div class="mini">It helps each of us understand where we are and how we can improve.</div>
+              </div>
+            </div>
+            <div style="height:18px"></div>
+            <p class="body">Instead of focusing on scores, what matters is whether daily work reflects the kind of people we want to become.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Alignment</div>
+        <h2 class="h1">Why one unified framework?</h2>
+        <div class="two-col">
+          <div class="card">
+            <ul class="bullets">
+              <li>We are not creating different evaluation systems for engineering, design, GTM, or any other function.</li>
+              <li>AI is breaking down role boundaries very quickly.</li>
+              <li>If we still define ourselves by “this is not my responsibility,” we limit our own potential.</li>
+            </ul>
+          </div>
+          <div class="card soft-blue">
+            <div class="h3">Signal we want to send</div>
+            <div style="height:12px"></div>
+            <div class="pill-list">
+              <div class="pill">Designers can now build</div>
+              <div class="pill">GTM can analyze data</div>
+              <div class="pill">Engineers can contribute to growth</div>
+            </div>
+            <div style="height:18px"></div>
+            <p class="body">By using one unified framework, we expect everyone to go beyond their role, not be defined by it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Framework</div>
+        <h2 class="h1">Three core evaluation dimensions</h2>
+        <div class="dim-grid">
+          <div class="card soft-blue">
+            <div class="dim-index">Dimension 01</div>
+            <div class="h3">Ownership</div>
+            <div class="mini" style="margin-top:10px">Take responsibility, execute decisively.</div>
+            <div class="mini" style="margin-top:18px">Core question: Do you truly own outcomes, not just finish assigned tasks?</div>
+          </div>
+          <div class="card soft-green">
+            <div class="dim-index">Dimension 02</div>
+            <div class="h3">Learning & Sharing</div>
+            <div class="mini" style="margin-top:10px">Keep growing, share openly.</div>
+            <div class="mini" style="margin-top:18px">Core question: Are you truly growing, and does that growth create value for the team?</div>
+          </div>
+          <div class="card soft-purple">
+            <div class="dim-index">Dimension 03</div>
+            <div class="h3">Creative</div>
+            <div class="mini" style="margin-top:10px">Innovate boldly, serve the goals.</div>
+            <div class="mini" style="margin-top:18px">Core question: Do you have the two most critical capabilities in the AI era, creativity and judgment?</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Dimension 01</div>
+        <h2 class="h1">Ownership</h2>
+        <div class="two-col">
+          <div class="card soft-blue">
+            <p class="body">Measures whether you truly own outcomes, not just finish assigned tasks.</p>
+            <div style="height:18px"></div>
+            <p class="body">Execution’s meaning has changed. It is no longer “I can get this done,” but “I can judge what is worth doing, and drive it to completion.”</p>
+          </div>
+          <div class="card">
+            <div class="h3">Expected behaviors</div>
+            <div style="height:14px"></div>
+            <div class="feature-grid">
+              <div class="feature"><div class="h4">Proactively identify problems</div><div class="mini">If you spot a problem, create an issue in Linear with context and expected outcomes.</div></div>
+              <div class="feature"><div class="h4">Follow through to completion</div><div class="mini">Creators and assignees are both responsible for completion rate.</div></div>
+              <div class="feature"><div class="h4">Quantify goals and own results</div><div class="mini">Connect delivery to core metrics such as new users or conversion steps.</div></div>
+              <div class="feature"><div class="h4">Bring a proposal</div><div class="mini">Think through possible solutions before discussing, do not hand the problem away.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Dimension 02</div>
+        <h2 class="h1">Learning & Sharing</h2>
+        <div class="two-col">
+          <div class="card soft-green">
+            <p class="body">Measures whether you are truly growing, and whether that growth creates value for the team.</p>
+            <div style="height:18px"></div>
+            <div class="callout">
+              <p class="body">In the AI era, your ceiling depends on how quickly you learn new things and put them into practice.</p>
+            </div>
+            <div style="height:18px"></div>
+            <div class="pill-list">
+              <div class="pill">Did you learn?</div>
+              <div class="pill">Did you apply it?</div>
+              <div class="pill">Did you form a best practice?</div>
+              <div class="pill">Did you share it?</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="h3">Expected behaviors</div>
+            <div style="height:14px"></div>
+            <ul class="bullets green">
+              <li>Use AI or a new method to solve a problem you previously could not solve, and turn it into a reusable best practice.</li>
+              <li>Proactively host or join a learning session to share valuable best practices with the team.</li>
+              <li>Share useful tools, methods, or insights in the Sharing channel in real time.</li>
+              <li>Bridge information gaps across teams so useful information does not stop with you.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Dimension 03</div>
+        <h2 class="h1">Creative</h2>
+        <div class="two-col">
+          <div class="card soft-purple">
+            <p class="body">Measures whether you have the two most critical capabilities in the AI era, creativity and judgment.</p>
+            <div style="height:18px"></div>
+            <p class="body">Creative is the key dimension that differentiates excellent from average.</p>
+            <div style="height:12px"></div>
+            <p class="body-sm">An average person can complete tasks, but may not know what to do, or how to do it better.</p>
+          </div>
+          <div class="card">
+            <div class="h3">Expected behaviors</div>
+            <div style="height:14px"></div>
+            <ul class="bullets">
+              <li>Make judgments on what is worth doing and why.</li>
+              <li>Explore new paths instead of relying only on old processes.</li>
+              <li>Articulate contribution to company goals such as growth, conversion, efficiency, or product experience.</li>
+              <li>Drive implementation through experiments, MVPs, or A/B tests.</li>
+              <li>Even unsuccessful attempts have value when there is clear retrospective and learning.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Evaluation Method</div>
+        <h2 class="h1">Objective data + subjective judgment</h2>
+        <div class="two-col">
+          <div class="card">
+            <div class="h3">Objective data (Source: Linear)</div>
+            <div style="height:14px"></div>
+            <div class="table">
+              <div class="table-row head"><div>Metric</div><div>Meaning</div></div>
+              <div class="table-row"><div># of issues created / assigned</div><div>How often someone proactively identifies problems and proposes ideas.</div></div>
+              <div class="table-row"><div>Completion rate</div><div># completed issues ÷ (# created by self + # assigned).</div></div>
+              <div class="table-row"><div>Major-goal completion</div><div>Quantified progress toward stated goals.</div></div>
+            </div>
+            <div style="height:14px"></div>
+            <p class="body-sm">Product, engineering, and design also reference GitHub PR activity.</p>
+            <div style="height:10px"></div>
+            <ul class="bullets green">
+              <li>Data is an anomaly trigger, not a direct score.</li>
+              <li>Leader explanation is required when completion rate is below 60%, issue creation is far below average, or PR activity is abnormally low.</li>
+            </ul>
+          </div>
+          <div class="card soft-blue">
+            <div class="h3">Subjective judgment</div>
+            <div style="height:14px"></div>
+            <p class="body">The final rating is primarily based on the leader’s judgment, with objective data as context.</p>
+            <div style="height:16px"></div>
+            <div class="pill-list">
+              <div class="pill">Monthly self-assessment</div>
+              <div class="pill">Objective data summary</div>
+              <div class="pill">Day-to-day observation</div>
+              <div class="pill">PR / design / docs quality</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Operating Cadence</div>
+        <h2 class="h1">Monthly execution cadence</h2>
+        <div class="timeline">
+          <div class="timeline-item done">
+            <div class="timeline-date">First work week</div>
+            <div class="card">
+              <div class="h3">Monthly goal setting</div>
+              <div class="body-sm" style="margin-top:8px">Monday to Wednesday</div>
+              <div style="height:10px"></div>
+              <p class="body">Create a monthly goal issue in Linear, including 1 to 3 core tasks for the month, quantified as much as possible. It becomes effective after asynchronous confirmation with the leader.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Last work week</div>
+            <div class="card soft-green">
+              <div class="h3">Monthly review</div>
+              <div class="body-sm" style="margin-top:8px">Wednesday to Friday</div>
+              <div style="height:10px"></div>
+              <ul class="bullets green">
+                <li>How much of your core goal did you complete this month? What did not go well, and why? (Ownership)</li>
+                <li>What did you learn this month, how did you apply it, and did you share it with the team? (Learning & Sharing)</li>
+                <li>What did you do this month that demonstrated creativity or judgment, and which company goal did it serve? (Creative)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner left">
+        <div class="caption">Quarterly Outcome</div>
+        <h2 class="h1">Quarterly evaluation and bonus</h2>
+        <div class="two-col">
+          <div class="card">
+            <div class="h3">Quarterly score calculation</div>
+            <div style="height:12px"></div>
+            <div class="callout"><p class="body">Final score = (M1 score + M2 score + M3 score) ÷ 3</p></div>
+            <div style="height:14px"></div>
+            <p class="body-sm">Employees receive only the final score, and will not see dimension weights or detailed calculation.</p>
+            <div style="height:20px"></div>
+            <div class="h3">Calibration meeting</div>
+            <div style="height:12px"></div>
+            <ul class="bullets">
+              <li>Time: first week after the quarter ends</li>
+              <li>Participants: all leaders</li>
+              <li>Duration: 60 to 90 minutes</li>
+              <li>Topics: align standards, large disagreements, high and low performers, cross-team contributions</li>
+            </ul>
+          </div>
+          <div class="card soft-blue">
+            <div class="h3">Bonus payout</div>
+            <div style="height:10px"></div>
+            <p class="body-sm">Baseline is 0.25 months of salary, adjusted by final quarterly score.</p>
+            <div style="height:16px"></div>
+            <div class="score-grid">
+              <div class="score-card"><div class="range">4.5–5.0</div><div class="mul">1.5x</div><div class="body-sm">0.375 month</div></div>
+              <div class="score-card"><div class="range">3.5–4.4</div><div class="mul">1.25x</div><div class="body-sm">0.3125 month</div></div>
+              <div class="score-card"><div class="range">2.5–3.4</div><div class="mul">1.0x</div><div class="body-sm">0.25 month</div></div>
+              <div class="score-card"><div class="range">1.5–2.4</div><div class="mul">0.75x</div><div class="body-sm">0.1875 month</div></div>
+              <div class="score-card"><div class="range">1.0–1.4</div><div class="mul">0.5x</div><div class="body-sm">0.125 month</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner center">
+        <div class="glow-line green"></div>
+        <div class="caption">Summary</div>
+        <h2 class="h1">The people we need</h2>
+        <p class="subtitle">This is not an assessment tool. It is our answer to what makes an excellent person in the AI era.</p>
+        <div class="three-col" style="width:100%; margin-top: 12px;">
+          <div class="card soft-blue"><div class="h3">Ownership</div><div class="body-sm" style="margin-top:10px">Proactively identify problems and take true responsibility for outcomes.</div></div>
+          <div class="card soft-green"><div class="h3">Learning Agility</div><div class="body-sm" style="margin-top:10px">Continuously learn and translate personal growth into team capability.</div></div>
+          <div class="card soft-purple"><div class="h3">Creativity & Judgment</div><div class="body-sm" style="margin-top:10px">See the direction, make judgments, and drive implementation.</div></div>
+        </div>
+        <div class="hero-row" style="margin-top: 8px;">
+          <div class="badge blue">Do the right thing</div>
+          <div class="badge green">Do it in a better way</div>
+          <div class="badge">Keep getting stronger</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footer-note">SONIC / Performance Framework</div>
+  <div class="nav" id="nav"></div>
+  <div class="counter" id="counter"></div>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const nav = document.getElementById('nav');
+      const counter = document.getElementById('counter');
+      let current = 0;
+      const update = (next) => {
+        if (next < 0 || next >= slides.length || next === current) return;
+        slides[current].classList.remove('active');
+        current = next;
+        slides[current].classList.add('active');
+        [...nav.children].forEach((dot, i) => dot.classList.toggle('active', i === current));
+        counter.textContent = `${current + 1} / ${slides.length}`;
+      };
+      slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => update(i);
+        nav.appendChild(dot);
+      });
+      counter.textContent = `1 / ${slides.length}`;
+      document.addEventListener('keydown', (e) => {
+        if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); update(current + 1); }
+        if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); update(current - 1); }
+        if (e.key === 'Home') { e.preventDefault(); update(0); }
+        if (e.key === 'End') { e.preventDefault(); update(slides.length - 1); }
+      });
+      let startX = 0;
+      document.addEventListener('touchstart', (e) => startX = e.touches[0].clientX, {passive:true});
+      document.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 50) update(current + (dx < 0 ? 1 : -1));
+      }, {passive:true});
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.nav')) return;
+        if (e.clientX > window.innerWidth * 0.72) update(current + 1);
+        if (e.clientX < window.innerWidth * 0.28) update(current - 1);
+      });
+    })();
+  </script>
+</body>
+</html>
